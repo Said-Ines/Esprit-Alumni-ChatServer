@@ -59,75 +59,76 @@ io.on("connection", (socket) => {
   socket.on("message", async (msg) => {
     console.log(msg);
     const message = new Message(msg);
+    console.log(message);
     try {
       await message.save();
       let targetId = msg.targetId;
       if (clients[targetId]) {
-        clients[targetId].emit("message", msg);
+        clients[targetId].emit("message", message);
       }
     } catch (err) {
       console.log(err);
     }
   });
 
-  socket.on(
-    "voice-message",
-    uploadVoiceMessage.single("voiceMessage"),
-    async (msg) => {
-      console.log(msg);
-      //convert the voice msg to an mp3 file
-      const sourceFile = path.join(
-        __dirname,
-        "public",
-        "uploads",
-        "voice-messages",
-        msg.voiceMessage.filename
-      );
-      const targetFile = path.join(
-        __dirname,
-        "public",
-        "uploads",
-        "voice-messages",
-        `${msg.voiceMessage.filename}.mp3`
-      );
-      const command = `ffmpeg -i ${sourceFile} -vn -ar 44100 -ac 2 -b:a 192k ${outputFile}`;
-      try {
-        await execPromise(command);
-        const voiceMessage = new VoiceMessage({
-          sourceId: msg.sourceId,
-          targetId: msg.targetId,
-          voiceMessage: {
-            filename: `${msg.voiceMessage.filename}.mp3`,
-            duration: msg.voiceMessage.duration,
-          },
-          createdAt: Date.now(),
-        });
-        await voiceMessage.save();
+  // socket.on(
+  //   "voice-message",
+  //   uploadVoiceMessage.single("voiceMessage"),
+  //   async (msg) => {
+  //     console.log(msg);
+  //     //convert the voice msg to an mp3 file
+  //     const sourceFile = path.join(
+  //       __dirname,
+  //       "public",
+  //       "uploads",
+  //       "voice-messages",
+  //       msg.voiceMessage.filename
+  //     );
+  //     const targetFile = path.join(
+  //       __dirname,
+  //       "public",
+  //       "uploads",
+  //       "voice-messages",
+  //       `${msg.voiceMessage.filename}.mp3`
+  //     );
+  //     const command = `ffmpeg -i ${sourceFile} -vn -ar 44100 -ac 2 -b:a 192k ${outputFile}`;
+  //     try {
+  //       await execPromise(command);
+  //       const voiceMessage = new VoiceMessage({
+  //         sourceId: msg.sourceId,
+  //         targetId: msg.targetId,
+  //         voiceMessage: {
+  //           filename: `${msg.voiceMessage.filename}.mp3`,
+  //           duration: msg.voiceMessage.duration,
+  //         },
+  //         createdAt: Date.now(),
+  //       });
+  //       await voiceMessage.save();
 
-        let targetId = msg.targetId;
-        if (clients[targetId]) {
-          clients[targetId].emit("voice-message", {
-            _id: voiceMessage._id,
-            sourceId: voiceMessage.sourceId,
-            targetId: voiceMessage.targetId,
-            voiceMessage: {
-              filename: voiceMessage.voiceMessage.filename,
-              duration: voiceMessage.voiceMessage.duration,
-            },
-            createdAt: voiceMessage.createdAt,
-          });
-        }
-      } catch (err) {
-        console.log(err);
-      }
-    }
-  );
+  //       let targetId = msg.targetId;
+  //       if (clients[targetId]) {
+  //         clients[targetId].emit("voice-message", {
+  //           _id: voiceMessage._id,
+  //           sourceId: voiceMessage.sourceId,
+  //           targetId: voiceMessage.targetId,
+  //           voiceMessage: {
+  //             filename: voiceMessage.voiceMessage.filename,
+  //             duration: voiceMessage.voiceMessage.duration,
+  //           },
+  //           createdAt: voiceMessage.createdAt,
+  //         });
+  //       }
+  //     } catch (err) {
+  //       console.log(err);
+  //     }
+  //   }
+  // );
 });
 
 //Routes
 app.use("/chats", chatRoute);
 
 //Start the server
-server.listen(port, "192.168.1.149", () => {
+server.listen(port, "192.168.1.18", () => {
   console.log(`Server is running on port: ${port}`);
 });
