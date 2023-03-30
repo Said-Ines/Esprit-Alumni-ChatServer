@@ -8,7 +8,7 @@ const { exec } = require("child_process");
 const { promisify } = require("util");
 const execPromise = promisify(exec);
 
-//Imports
+//Importsnotification
 const Message = require("./models/message.js");
 const chatRoute = require("./routes/chatRoute.js");
 const uploadVoiceMessage = require("./middlewares/multer-config.js");
@@ -65,6 +65,8 @@ io.on("connection", (socket) => {
       let targetId = msg.targetId;
       if (clients[targetId]) {
         clients[targetId].emit("message", message);
+        // Send push notification to the target user
+        clients[targetId].emit("notification", message);
       }
     } catch (err) {
       console.log(err);
@@ -129,6 +131,6 @@ io.on("connection", (socket) => {
 app.use("/chats", chatRoute);
 
 //Start the server
-server.listen(port, "192.168.1.18", () => {
+server.listen(port, "192.168.1.29", () => {
   console.log(`Server is running on port: ${port}`);
 });

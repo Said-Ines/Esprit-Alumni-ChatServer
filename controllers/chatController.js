@@ -20,7 +20,7 @@ async function getConversationMessages(req, res) {
 }
 module.exports = getConversationMessages;
 
-async function getUserConversations(req, res) {
+/*async function getUserConversations(req, res) {
   const { userId } = req.body;
 
   try {
@@ -69,4 +69,4 @@ async function getUserConversations(req, res) {
   }
 }
 
-module.exports = getUserConversations;
+module.exports = getUserConversations;*/
