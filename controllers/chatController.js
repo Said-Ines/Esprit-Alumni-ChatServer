@@ -1,6 +1,6 @@
 const Message = require("../models/message");
 
-async function getConversationMessages(req, res) {
+exports.getConversationMessages = async (req, res) => {
   const { sourceId, targetId } = req.body;
   try {
     const messages = await Message.find({
@@ -17,8 +17,22 @@ async function getConversationMessages(req, res) {
   } catch (err) {
     res.status(500).json(err);
   }
-}
-module.exports = getConversationMessages;
+};
+
+exports.deleteMessage = async (req, res) => {
+  const messageId = req.body.messageId;
+  try {
+    const message = await Message.findById(messageId);
+    if (!message) {
+      res.status(404).json("Message not found");
+    } else {
+      await message.deleteOne();
+      res.status(200).json("Message deleted");
+    }
+  } catch (err) {
+    res.status(500).json(err);
+  }
+};
 
 /*async function getUserConversations(req, res) {
   const { userId } = req.body;
