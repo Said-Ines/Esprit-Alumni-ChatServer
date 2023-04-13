@@ -11,13 +11,13 @@ const execPromise = promisify(exec);
 //Importsnotification
 const Message = require("./models/message.js");
 const chatRoute = require("./routes/chatRoute.js");
-const uploadVoiceMessage = require("./middlewares/multer-config.js");
-const VoiceMessage = require("./models/voiceMessage.js");
+const Conversation = require("./models/converastion.js");
 
 //Constants
 const app = express();
 const port = process.env.PORT || 3000;
 const server = http.createServer(app);
+//const databaseName = "ESpritAlumniDB";
 const databaseName = "chatApp";
 
 var io = require("socket.io")(server, {
@@ -30,7 +30,10 @@ var io = require("socket.io")(server, {
 mongoose.set("debug", true);
 mongoose.Promise = global.Promise;
 mongoose
-  .connect(`mongodb://localhost:27017/${databaseName}`)
+  .connect(`mongodb://localhost:27017/${databaseName}`, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => {
     console.log(`Connected to ${databaseName}`);
   })
@@ -63,6 +66,14 @@ io.on("connection", (socket) => {
     try {
       await message.save();
       let targetId = msg.targetId;
+
+      //Ajouter le message et le targetId dans la collection conversations
+      // const conversation = await Conversation.findOneAndUpdate(
+      //   { targetId: targetId },
+      //   { $push: { messagesList: message._id } },
+      //   { upsert: true, new: true }
+      // );
+
       if (clients[targetId]) {
         clients[targetId].emit("message", message);
         // Send push notification to the target user
@@ -72,65 +83,12 @@ io.on("connection", (socket) => {
       console.log(err);
     }
   });
-
-  // socket.on(
-  //   "voice-message",
-  //   uploadVoiceMessage.single("voiceMessage"),
-  //   async (msg) => {
-  //     console.log(msg);
-  //     //convert the voice msg to an mp3 file
-  //     const sourceFile = path.join(
-  //       __dirname,
-  //       "public",
-  //       "uploads",
-  //       "voice-messages",
-  //       msg.voiceMessage.filename
-  //     );
-  //     const targetFile = path.join(
-  //       __dirname,
-  //       "public",
-  //       "uploads",
-  //       "voice-messages",
-  //       `${msg.voiceMessage.filename}.mp3`
-  //     );
-  //     const command = `ffmpeg -i ${sourceFile} -vn -ar 44100 -ac 2 -b:a 192k ${outputFile}`;
-  //     try {
-  //       await execPromise(command);
-  //       const voiceMessage = new VoiceMessage({
-  //         sourceId: msg.sourceId,
-  //         targetId: msg.targetId,
-  //         voiceMessage: {
-  //           filename: `${msg.voiceMessage.filename}.mp3`,
-  //           duration: msg.voiceMessage.duration,
-  //         },
-  //         createdAt: Date.now(),
-  //       });
-  //       await voiceMessage.save();
-
-  //       let targetId = msg.targetId;
-  //       if (clients[targetId]) {
-  //         clients[targetId].emit("voice-message", {
-  //           _id: voiceMessage._id,
-  //           sourceId: voiceMessage.sourceId,
-  //           targetId: voiceMessage.targetId,
-  //           voiceMessage: {
-  //             filename: voiceMessage.voiceMessage.filename,
-  //             duration: voiceMessage.voiceMessage.duration,
-  //           },
-  //           createdAt: voiceMessage.createdAt,
-  //         });
-  //       }
-  //     } catch (err) {
-  //       console.log(err);
-  //     }
-  //   }
-  // );
 });
 
 //Routes
 app.use("/chats", chatRoute);
 
 //Start the server
-server.listen(port, "192.168.1.29", () => {
+server.listen(port, "172.17.0.255", () => {
   console.log(`Server is running on port: ${port}`);
 });

@@ -1,4 +1,6 @@
-const Message = require("../models/message");
+const Message = require("../models/message.js");
+const Conversation = require("../models/converastion.js");
+const User = require("../../Esprit-Alumni-backend/models/user.js");
 
 exports.getConversationMessages = async (req, res) => {
   const { sourceId, targetId } = req.body;
@@ -34,7 +36,7 @@ exports.deleteMessage = async (req, res) => {
   }
 };
 
-/*async function getUserConversations(req, res) {
+exports.getUserConversations = async (req, res) => {
   const { userId } = req.body;
 
   try {
@@ -81,6 +83,45 @@ exports.deleteMessage = async (req, res) => {
         "Erreur lors de la récupération des conversations de l'utilisateur"
       );
   }
-}
+};
 
-module.exports = getUserConversations;*/
+exports.getConversation = async (req, res) => {
+  try {
+    const targetUser = await User.findOne({ _id: req.body.targetId }, null, {
+      timeout: 70000,
+    });
+    if (!targetUser) {
+      res.status(404).json("User not found");
+    }
+    const conversation = await Conversation.findOne({
+      targetId: targetUser._id,
+    })
+      .populate({
+        path: "messagesList",
+        model: "Message",
+        populate: {
+          path: "sourceId",
+          select: "username profile.profile_image",
+        },
+      })
+      .populate({
+        path: "targetId",
+        select: "username profile.profile_image",
+      })
+      .select("messagesList targetId");
+
+    if (!conversation) {
+      res.status(404).json("Conversation not found");
+    }
+    const { targetId: user } = conversation;
+    const { username, profile_image } = user;
+    return res.status(200).json({
+      conversation: conversation,
+      username: username,
+      profile_image: profile_image,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Erreur lors de la récupération de la conversation");
+  }
+};
