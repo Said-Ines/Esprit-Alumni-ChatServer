@@ -10,15 +10,16 @@ const execPromise = promisify(exec);
 
 //Importsnotification
 const Message = require("./models/message.js");
-const chatRoute = require("./routes/chatRoute.js");
 const Conversation = require("./models/converastion.js");
+const chatRoute = require("./routes/chatRoute.js");
+//const Conversation = require("./models/converastion.js");
 
 //Constants
 const app = express();
 const port = process.env.PORT || 3000;
 const server = http.createServer(app);
-//const databaseName = "ESpritAlumniDB";
-const databaseName = "chatApp";
+const databaseName = "ESpritAlumniDB";
+//const databaseName = "chatApp";
 
 var io = require("socket.io")(server, {
   cors: {
@@ -52,28 +53,26 @@ var clients = {};
 io.on("connection", (socket) => {
   console.log("Connected");
   console.log(socket.id, "has joined");
-
   socket.on("signin", (id) => {
     console.log(id);
     clients[id] = socket;
     console.log(clients);
   });
-
   socket.on("message", async (msg) => {
     console.log(msg);
     const message = new Message(msg);
     console.log(message);
     try {
       await message.save();
+
+      // Enregistrer le message dans la collection Conversation
+      const conversation = await Conversation.findOneAndUpdate(
+        { targetId: msg.targetId },
+        { $push: { messagesList: message } },
+        { upsert: true, new: true }
+      );
+
       let targetId = msg.targetId;
-
-      //Ajouter le message et le targetId dans la collection conversations
-      // const conversation = await Conversation.findOneAndUpdate(
-      //   { targetId: targetId },
-      //   { $push: { messagesList: message._id } },
-      //   { upsert: true, new: true }
-      // );
-
       if (clients[targetId]) {
         clients[targetId].emit("message", message);
         // Send push notification to the target user
@@ -89,6 +88,6 @@ io.on("connection", (socket) => {
 app.use("/chats", chatRoute);
 
 //Start the server
-server.listen(port, "172.17.0.255", () => {
+server.listen(port, "172.17.2.100", () => {
   console.log(`Server is running on port: ${port}`);
 });

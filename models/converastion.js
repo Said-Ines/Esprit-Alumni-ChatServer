@@ -3,9 +3,13 @@ const Message = require("./message");
 
 const conversationSchema = new mongoose.Schema({
   targetId: {
-    // type: mongoose.Schema.Types.ObjectId,
-    // ref: "User",
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    //type: String,
+  },
+  sourceId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
   },
   messagesList: [
     {
