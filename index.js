@@ -88,6 +88,6 @@ io.on("connection", (socket) => {
 app.use("/chats", chatRoute);
 
 //Start the server
-server.listen(port, "172.17.2.100", () => {
+server.listen(port, "172.17.13.194", () => {
   console.log(`Server is running on port: ${port}`);
 });
