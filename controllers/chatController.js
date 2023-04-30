@@ -28,6 +28,15 @@ exports.deleteMessage = async (req, res) => {
     if (!message) {
       res.status(404).json("Message not found");
     } else {
+      const conversation = await Conversation.findOne({
+        messagesList: { $elemMatch: { $eq: messageId } },
+      });
+      if (conversation) {
+        // Remove the message from the conversation's messagesList
+        conversation.messagesList.pull(messageId);
+        await conversation.save();
+      }
+      // Delete the message from messages'collection
       await message.deleteOne();
       res.status(200).json("Message deleted");
     }
