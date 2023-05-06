@@ -90,3 +90,28 @@ exports.getMessage = async (req, res) => {
     res.status(500).json(err);
   }
 };
+
+exports.deleteConversation = async (req, res) => {
+  try {
+    const { conversationId } = req.body;
+    const conversation = await Conversation.findById(conversationId);
+    if (!conversation) {
+      return res.status(404).json({ message: "Conversation not found" });
+    }
+
+    // Delete all associated messages
+    for (const messageId of conversation.messagesList) {
+      await Message.findByIdAndDelete(messageId);
+    }
+
+    // Delete the conversation
+    await Conversation.findByIdAndDelete(conversationId);
+
+    res.status(200).json({
+      message: "Conversation and associated messages deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting conversation:", error);
+    res.status(500).json({ message: "Error deleting conversation" });
+  }
+};

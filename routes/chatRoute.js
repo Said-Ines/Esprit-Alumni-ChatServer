@@ -9,4 +9,5 @@ router.post("/getUserConversations", controller.getUserConversations);
 router.delete("/deleteMessage", controller.deleteMessage);
 router.post("/getConversation", controller.getConversation);
 router.post("/getMessage", controller.getMessage);
+router.delete("/deleteConversation", controller.deleteConversation);
 module.exports = router;

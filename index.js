@@ -59,16 +59,15 @@ io.on("connection", (socket) => {
     console.log(clients);
   });
   socket.on("message", async (msg) => {
-    console.log(msg);
     const message = new Message(msg);
-    console.log(message);
+
     try {
       await message.save();
 
       // Enregistrer le message dans la collection Conversation
       const conversation = await Conversation.findOneAndUpdate(
         { targetId: msg.targetId },
-        { $push: { messagesList: message } },
+        { sourceId: msg.sourceId, $push: { messagesList: message } },
         { upsert: true, new: true }
       );
 
@@ -88,6 +87,6 @@ io.on("connection", (socket) => {
 app.use("/chats", chatRoute);
 
 //Start the server
-server.listen(port, "172.17.2.217", () => {
+server.listen(port, "172.17.12.41", () => {
   console.log(`Server is running on port: ${port}`);
 });
