@@ -73,7 +73,9 @@ io.on("connection", (socket) => {
 
       let targetId = msg.targetId;
       if (clients[targetId]) {
+        console.log(message);
         clients[targetId].emit("message", message);
+
         // Send push notification to the target user
         clients[targetId].emit("notification", message);
       }

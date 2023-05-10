@@ -59,8 +59,11 @@ exports.getUserConversations = async (req, res) => {
 
 exports.getConversation = async (req, res) => {
   try {
-    const { targetId } = req.body;
-    const conversation = await Conversation.findOne({ targetId });
+    const { targetId, sourceId } = req.body;
+    const conversation = await Conversation.findOne({
+      targetId: targetId,
+      sourceId: sourceId,
+    });
 
     if (!conversation) {
       return res.status(404).json({ message: "Conversation not found" });
@@ -83,7 +86,7 @@ exports.getMessage = async (req, res) => {
     }
     res
       .status(200)
-      //.json({ message: message.message, createdAt: message.createdAt });
+      //.json({ message: message.message });
       .json(message.message);
   } catch (err) {
     console.error(err);
