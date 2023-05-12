@@ -8,11 +8,10 @@ const { exec } = require("child_process");
 const { promisify } = require("util");
 const execPromise = promisify(exec);
 
-//Importsnotification
+//Models & Routes
 const Message = require("./models/message.js");
 const Conversation = require("./models/converastion.js");
 const chatRoute = require("./routes/chatRoute.js");
-//const Conversation = require("./models/converastion.js");
 
 //Constants
 const app = express();
@@ -75,13 +74,21 @@ io.on("connection", (socket) => {
       if (clients[targetId]) {
         console.log(message);
         clients[targetId].emit("message", message);
-
+        console.log(message);
         // Send push notification to the target user
         clients[targetId].emit("notification", message);
       }
     } catch (err) {
       console.log(err);
     }
+  });
+
+  socket.on("disconnect", (reason) => {
+    console.log(`Client disconnected: ${reason}`);
+  });
+
+  socket.on("error", (error) => {
+    console.error(`Error occurred: ${error}`);
   });
 });
 

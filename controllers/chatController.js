@@ -1,6 +1,5 @@
 const Message = require("../models/message.js");
 const Conversation = require("../models/converastion.js");
-const User = require("../../Esprit-Alumni-backend/models/user.js");
 
 exports.getConversationMessages = async (req, res) => {
   const { sourceId, targetId } = req.body;
@@ -50,7 +49,7 @@ exports.getUserConversations = async (req, res) => {
   try {
     const conversations = await Conversation.find({
       $or: [{ sourceId: userId }, { targetId: userId }],
-    }).sort({ createdAt: 1 });
+    }).sort({ createdAt: -1 });
     res.status(200).json(conversations);
   } catch (err) {
     res.status(500).json(err);
